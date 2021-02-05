@@ -41,8 +41,7 @@ class SiteInteraction:
 
     def __init__(self, apartment_parameters, main_page_html_markup, apartments_page_html_markup,
                  apartment_page_html_markup):
-        self.apartment_parameters = apartment_parameters  # json/dict that
-        self.main_page_html_markup = main_page_html_markup  # HTML markup for main page
+        self.apartment_parameters = apartment_parameters  # HTML markup for main page
         self.apartments_page_html_markup = apartments_page_html_markup  # HTML markup for page with apartments
         self.apartment_page_html_markup = apartment_page_html_markup  # HTML markup for apartment page
         self.driver = self.start_driver()

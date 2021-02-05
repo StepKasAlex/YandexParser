@@ -1,0 +1,9 @@
+{
+  "more_params_button": {"span": {"class":  "FiltersFormField__label"}},
+  "room_count": {"div": {"class":  "FiltersFormField_name_roomsTotal"}, "button": {}},
+  "room_buttons": {"button": {"class":  "Button"}},
+  "house_type_popup": {"div": {"class": "SelectFormControl_name_newFlat"}, "button": {}},
+  "house_class": {"div": {"class": "FiltersFormField__item_name_buildingClass"}, "button": {}},
+  "house_leased": {"div": {"div": "FiltersFormField__item_name_deliveryDate"}, "button": {}},
+  "go_apartments_page": {"div": {"class": "FiltersFormField__counter-submit"}}
+}
