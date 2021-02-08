@@ -9,14 +9,15 @@ class ApartmentInfo(models.Model):
     floor = models.PositiveSmallIntegerField(verbose_name='этаж')
     is_balcony = models.BooleanField(verbose_name='наличие балкона')
     house_type = models.CharField(max_length=50, verbose_name='тип дома (материал)', null=True)
+    house_name = models.CharField(max_length=255, verbose_name='название ЖК', null=True)
     finishing = models.CharField(max_length=50, verbose_name='отделка', null=True)
     is_parking = models.CharField(max_length=50, verbose_name='Наличие парковки', null=True)
     is_cctv = models.BooleanField(verbose_name='наличие видеонаблюдения', null=True)
     is_concierge = models.CharField(max_length=50, verbose_name='наличие консьержа', null=True)
     fenced_area = models.BooleanField(verbose_name='огороженная территория', null=True)
     distance_nearest_metro = models.CharField(max_length=25, verbose_name='Расстояние до ближайшей станции',
-                                              default='Не определено')
-    distance_nearest_ground_transport = models.CharField(max_length=25,
+                                              null=True)
+    distance_nearest_ground_transport = models.CharField(max_length=25, null=True,
                                                          verbose_name='Расстояние до ближайшей остановки наземного транспорта')
     created_at = models.DateField(verbose_name='время создания', auto_now_add=True)
 

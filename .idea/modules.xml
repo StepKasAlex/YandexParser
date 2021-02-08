@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/YandexNed.iml" filepath="$PROJECT_DIR$/.idea/YandexNed.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/YandexParser.iml" filepath="$PROJECT_DIR$/.idea/YandexParser.iml" />
     </modules>
   </component>
 </project>

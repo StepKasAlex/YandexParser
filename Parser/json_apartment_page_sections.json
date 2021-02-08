@@ -1,0 +1,6 @@
+{
+  "tech_info": {"div": {"class":  "OfferTechDescription"}},
+  "detail_info": {"div": {"class": "OfferDetailsDescription"}},
+  "building_info": {"section": {"class": "BuildingInfo"}},
+  "stations_info": {"div": {"class": "OfferHeaderLocation__stations"}}
+}

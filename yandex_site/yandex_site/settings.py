@@ -79,7 +79,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'yandex_parser',
         'USER': 'root',
-        'PASSWORD': 'iforgotI25',
+        'PASSWORD': 'iforgotI2555!',
         'HOST': 'localhost',
     }
 }

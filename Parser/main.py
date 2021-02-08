@@ -4,6 +4,8 @@ from selenium import webdriver
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
 
+import MySQLdb
+
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
@@ -48,7 +50,10 @@ class SiteInteraction:
         pass
 
     def start_driver(self):
-        """initialize selenium webdriver"""
+        """
+        initialize selenium webdriver
+        return webdriver copy
+        """
         options = self.set_driver_options()
         return webdriver.Chrome(os.getenv('DRIVER_PATH', options))
 
@@ -58,11 +63,12 @@ class SiteInteraction:
 
     def load_page(self, page):
         """Load page"""
-        pass
+        self.driver.get(page)
+        return None
 
     def get_html_markup_from_page(self):
         """Get html markup from the page"""
-        pass
+        return BeautifulSoup(self.driver.page_source, 'html.parser')
 
     def set_city(self):
         """Set necessary city"""
