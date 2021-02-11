@@ -19,13 +19,14 @@ class ApartmentInfo(models.Model):
                                               null=True)
     distance_nearest_ground_transport = models.CharField(max_length=25, null=True,
                                                          verbose_name='Расстояние до ближайшей остановки наземного транспорта')
-    created_at = models.DateField(verbose_name='время создания', auto_now_add=True)
+    created_at = models.DateField(verbose_name='время создания', auto_now_add=True),
+    apartment_link = models.CharField(max_length=255, default=0, verbose_name='Ссылка на объявление квартиры')
 
 
 class Task(models.Model):
-    apartment_params_config = models.JSONField(verbose_name='Конфиг с разметкой для параметров апартаментов')
-    main_page_config = models.JSONField(verbose_name='Конфиг для главной страницы с настройкой параметров')
-    apartments_page_config = models.JSONField(verbose_name='Конфиг для страницы с квартирами')
+    main_page_config = models.JSONField(verbose_name='Конфиг с разметкой для параметров апартаментов')
+    apartments_page_config = models.JSONField(verbose_name='Конфиг для главной страницы с настройкой параметров')
+    apartment_page_sections_config = models.JSONField(verbose_name='Конфиг для страницы с квартирами')
     apartment_page_config = models.JSONField(verbose_name='Конфиг для страницы с квартирой')
     status = models.PositiveSmallIntegerField(verbose_name='статус')
     created_at = models.DateField(verbose_name='Дата создания', auto_now_add=True)

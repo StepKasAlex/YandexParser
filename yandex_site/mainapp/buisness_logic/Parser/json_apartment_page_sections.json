@@ -1,6 +1,6 @@
 {
-  "tech_info": {"div": {"class":  "OfferTechDescription"}},
-  "detail_info": {"div": {"class": "OfferDetailsDescription"}},
-  "building_info": {"section": {"class": "BuildingInfo"}},
-  "stations_info": {"div": {"class": "OfferHeaderLocation__stations"}}
+  "tech_info": {"tag": "div", "tag_attrs": {"class":  "OfferTechDescription"}},
+  "detail_info": {"tag": "div", "tag_attrs": {"class": "OfferDetailsDescription"}},
+  "building_info": {"tag": "section", "tag_attrs": {"class": "BuildingInfo"}},
+  "stations_info": {"tag": "div", "tag_attrs": {"class": "OfferHeaderLocation__stations"}}
 }

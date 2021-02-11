@@ -1,5 +1,4 @@
 {
-  "apartment_ad": {"li": {"class": "h7DZqJfdHwtSDNg__list-item"}},
-  "apartment_link": {"a": {"class":  "h7DZqJfdHwtSDNgItem__link"}},
+  "apartment_ad": {"div": {"class": "OffersSerpItem__generalInfo"}},
   "next_page_button": {"a":  {"class": "Pager__radio-link"}}
 }
