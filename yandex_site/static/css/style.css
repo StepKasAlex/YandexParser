@@ -1,0 +1,79 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: rgb(61, 66, 69);
+    height: 100%;
+}
+
+.container {
+    margin-left: auto;
+    margin-right: auto;
+    height: 100%;
+}
+
+.top-menu {
+    /*margin-top: -20px;*/
+    padding-top: 5px;
+    padding-bottom: 5px;
+    text-align: center;
+    background-color: rgb(24, 26, 27);
+}
+
+.top-menu h2 {
+    color: rgb(174, 167, 156);
+}
+
+.main-info {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    height: 100%;
+}
+
+.main-menu {
+    text-align: left;
+    width: 150px;
+    background-color: rgb(42, 45, 47);;
+}
+
+.menu-buttons {
+    padding-top: 20px;
+}
+
+.menu-img {
+    padding-top: 10px;
+    margin-left: 30%;
+}
+
+.menu-img-img {
+    max-width: 50px;
+}
+
+.menu-button {
+    margin-top: 10px;
+    font-size: 15px;
+    margin-left: 25%;
+}
+
+.menu-button a {
+    text-decoration: none;
+    color: rgb(180, 173, 164);;
+}
+
+.main-page__header {
+    margin-left: 50px;
+    color: rgb(174, 167, 156)
+}
+
+.main-page-data {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    height: 100%;
+}
+
+p.empty {
+    margin-left: 50px;
+    color: rgb(174, 167, 157);
+    font-size: 16px;
+}

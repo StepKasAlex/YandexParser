@@ -1,10 +1,11 @@
 import os
+import psycopg2
+import threading
 
 from selenium import webdriver
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
-
-import MySQLdb
+from mainapp.models import ApartmentInfo, Task
 
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -14,17 +15,17 @@ if os.path.exists(dotenv_path):
 
 class ParserController:
 
-    def __init__(self):
-        self.sql = None  # instance of the class for interacting with the database
-        self.is_active_parser = False
-
-    def find_out_task(self):
-        """Try to find new task for parsing the site"""
-        pass
-
-    def change_parser_status(self):
+    def change_parser_status(self) -> None:
         """Change status is_active_parser"""
-        pass
+        if int(self.is_active_task) == 1:
+            Task.objects.filter(pk=1).update(status=0)
+        else:
+            Task.objects.filter(pk=1).update(status=1)
+
+    @staticmethod
+    def is_active_task():
+        """Find out is task running"""
+        return Task.objects.all().values('status')[0].get('status')
 
     def get_all_params_from_db(self):
         """Get all necessary parameters from database"""

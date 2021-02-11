@@ -1,3 +1,6 @@
 from django.shortcuts import render
+from django.views.generic import ListView
 
-# Create your views here.
+
+def data_view(request):
+    return render(request, 'mainapp/index.html')

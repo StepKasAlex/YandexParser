@@ -28,4 +28,4 @@ class Task(models.Model):
     apartments_page_config = models.JSONField(verbose_name='Конфиг для страницы с квартирами')
     apartment_page_config = models.JSONField(verbose_name='Конфиг для страницы с квартирой')
     status = models.PositiveSmallIntegerField(verbose_name='статус')
-    created_at = models.DateField(verbose_name='Дата создания', auto_created=True)
+    created_at = models.DateField(verbose_name='Дата создания', auto_now_add=True)

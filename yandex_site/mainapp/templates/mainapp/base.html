@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <title>Парсер Яндекс.Недвижимость</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        {% block top-menu %}
+            <div class="top-menu">
+                <h2 class="top-menu-h2">
+                    Парсер Яндекс.Недвижимость
+                </h2>
+            </div>
+        {% endblock %}
+        <div class="main-info">
+            {% block main-menu %}
+                <div class="main-menu">
+                    <div class="menu-img">
+                        <img src="{% static 'img/admin.svg' %}" alt="admin-img" class="menu-img-img">
+                    </div>
+                    <div class="menu-buttons">
+                        <div class="menu-button">
+                            <a href="{% url 'mainapp:main' %}">На главную</a>
+                        </div>
+                        <div class="menu-button">
+                            <a href="#">Парсер</a>
+                        </div>
+                        <div class="menu-button">
+                            <a href="#">Настройки</a>
+                        </div>
+                        <div class="menu-button">
+                            <a href="#">Cкачать отчет</a>
+                        </div>
+                    </div>
+                </div>
+            {% endblock %}
+
+            {% block info %}
+
+            {% endblock %}
+        </div>
+    </div>
+</body>
+</html>
