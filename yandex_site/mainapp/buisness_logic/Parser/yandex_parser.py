@@ -1,6 +1,8 @@
 import os
 import threading
 import csv
+import requests
+import time
 
 from django.http import HttpResponse
 from selenium import webdriver
@@ -98,18 +100,6 @@ class YandexParser:
         self.apartments_config = configs[0]
         self.apartment_sections = configs[1]
         self.apartment = configs[2]
-        self.driver = self.start_driver()
-
-    def start_driver(self) -> webdriver.Chrome:
-        """Start selenium webdriver"""
-        options = self.set_driver_options()
-        return webdriver.Chrome(executable_path=os.getenv('DRIVER_PATH'), options=options)
-
-    def set_driver_options(self):
-        """Set options for selenium webdriver"""
-        options = webdriver.ChromeOptions()
-        options.add_argument('--headless')
-        return options
 
     @staticmethod
     def stop_parsing() -> (True, False):
@@ -123,9 +113,9 @@ class YandexParser:
     def start_parsing(self) -> None:
         """Start parsing yandex site"""
         try:
-            current_page_html_markup = self.get_html_markup_from_page(self.page)
             apartments = []
             while True:
+                current_page_html_markup = self.get_html_markup_from_page(self.page)
                 if self.stop_parsing():
                     return None
                 apartments_links = self.get_all_apartments_links_from_page(current_page_html_markup)
@@ -140,9 +130,11 @@ class YandexParser:
             self.close_driver()
             ParserController().change_parser_status(from_parser_stop=True)
 
-    def load_page(self, page) -> None:
+    @staticmethod
+    def load_page(page):
         """load page"""
-        self.driver.get(page)
+        r = requests.get(page)
+        return r
 
     def close_driver(self) -> None:
         """Close driver"""
@@ -150,8 +142,8 @@ class YandexParser:
 
     def get_html_markup_from_page(self, page: str) -> BeautifulSoup:
         """Get html markup from the page"""
-        self.load_page(page)
-        return BeautifulSoup(self.driver.page_source, 'html.parser')
+        r = self.load_page(page)
+        return BeautifulSoup(r.content, 'html.parser')
 
     def get_all_apartments_links_from_page(self, current_page_html_markup) -> list:
         """Get all apartments links from current page"""
@@ -279,7 +271,6 @@ class YandexParser:
             next_num = 1
 
         self.page = self.page + f'&page={next_num}'
-        self.driver.get(self.page)
 
     def edit_text_by_section(self, section_name: str, clear_text: str, subs_for_search: str, sub: str) -> str:
         """Get normal text from clear_text"""
