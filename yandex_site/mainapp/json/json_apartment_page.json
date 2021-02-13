@@ -1,6 +1,6 @@
 {
-  "rooms_number__tech_info": {"tag": "li", "tag_attrs": "NULL",
-    "subs": ["комнаты", "комнат", "Студия"]},
+  "rooms_info__tech_info": {"tag": "li", "tag_attrs": "NULL",
+    "subs": ["комнаты", "комната" ,"комнат", "Студия"]},
   "total_area__tech_info": {"tag":"li", "tag_attrs": "NULL",
     "subs": ["общая площадь", "общая площадьь"]},
   "living_space__tech_info": {"tag": "li", "tag_attrs": "NULL",

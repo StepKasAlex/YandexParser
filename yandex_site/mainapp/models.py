@@ -2,11 +2,11 @@ from django.db import models
 
 
 class ApartmentInfo(models.Model):
-    rooms_info = models.PositiveSmallIntegerField(verbose_name='количество квартир', blank=True, null=True)
-    total_area = models.FloatField(verbose_name='общая площадь', blank=True, null=True)
-    living_space = models.FloatField(verbose_name='жилая площадь', blank=True, null=True)
-    kitchen_space = models.FloatField(verbose_name='площадь кухни', blank=True, null=True)
-    floor = models.PositiveSmallIntegerField(verbose_name='этаж', blank=True, null=True)
+    rooms_info = models.CharField(max_length=255, verbose_name='количество квартир', blank=True, null=True)
+    total_area = models.CharField(max_length=255, verbose_name='общая площадь', blank=True, null=True)
+    living_space = models.CharField(max_length=255, verbose_name='жилая площадь', blank=True, null=True)
+    kitchen_space = models.CharField(max_length=255, verbose_name='площадь кухни', blank=True, null=True)
+    floor = models.CharField(max_length=255, verbose_name='этаж', blank=True, null=True)
     is_balcony = models.CharField(max_length=255, verbose_name='наличие балкона', blank=True, null=True)
     house_type = models.CharField(max_length=255, verbose_name='тип дома (материал)', blank=True, null=True)
     house_name = models.CharField(max_length=255, verbose_name='название ЖК', blank=True, null=True)

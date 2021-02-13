@@ -15,6 +15,10 @@ def data_view(request):
     return render(request, 'mainapp/index.html', context=context)
 
 
+def report_page_view(request):
+    return render(request, 'mainapp/download_report.html')
+
+
 def start_parsing_view(request):
     yandex_parser.ParserController().start_task()
     return HttpResponseRedirect(reverse('mainapp:main'))
@@ -25,8 +29,10 @@ def stop_parsing_view(request):
     return HttpResponseRedirect(reverse('mainapp:main'))
 
 
+def download_report(request):
+    return yandex_parser.YandexParserInfoGetter().create_csv_file_from_database()
+
+
 class ParserInfoTableView(ListView):
     model = ApartmentInfo
     template_name = 'mainapp/parser_view.html'
-
-

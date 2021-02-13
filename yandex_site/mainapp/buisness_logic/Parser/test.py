@@ -13,12 +13,14 @@
 #     print(f'Разметка - {markup}')
 #     print(f'СЕКЦИЯ - {section_name}')
 
-string = 'I love you'
+string = 'https://realty.yandex.ru/moskva/kupit/kvartira/studiya,1,2,3,4-i-bolee-komnatnie/?newFlat=YES&' \
+                    'deliveryDate=FINISHED&buildingClass=BUSINESS&page=1'
 
-list_ = ['love', 'you']
+now_page_num = string.split('&')[-1].split('=')[-1]
 
-for el in list_:
-    string = string.replace(el, '')
-    print(string)
+try:
+    next_num = int(now_page_num) + 1
+except ValueError:
+    next_num = 1
 
-print(string)
+print(next_num)

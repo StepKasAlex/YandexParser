@@ -1,9 +1,8 @@
 import os
-import psycopg2
 import threading
-import json
-import time
+import csv
 
+from django.http import HttpResponse
 from selenium import webdriver
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
@@ -62,7 +61,6 @@ class ParserController:
             task = YandexParser(configs=self._get_all_params_from_db())
             task = threading.Thread(target=task.start_parsing)
             task.start()
-            print('started')
             return True
         else:
             return False
@@ -74,9 +72,22 @@ class ParserController:
 
 class YandexParserInfoGetter:
 
-    def get_number_of_collected_info(self):
-        """Get number of collected info from yandex site"""
-        pass
+    def create_csv_file_from_database(self):
+        """Create csv file from database information"""
+        response = HttpResponse(content_type="text/csv")
+        response['Content-Disposition'] = 'attachment; filename="information.csv"'
+
+        titles = ['Количество комнат', 'Общая площадь', 'Жилая площадь', 'Площадь кухни', 'Этаж', 'Балкон', 'Тип дома',
+                  'Отделка', 'Парковки', 'Видеонаблюдение', 'Консьерж', 'Территория', 'Расстояние до станции',
+                  'Ссылка на объявление']
+        writer = csv.writer(response)
+        writer.writerow(titles)
+        information = ApartmentInfo.objects.all()
+        for info in information:
+            writer.writerow([info.rooms_info, info.total_area, info.living_space, info.kitchen_space, info.floor,
+                             info.is_balcony, info.house_type, info.finishing, info.is_parking, info.is_cctv,
+                             info.is_concierge, info.fenced_area, info.distance_nearest_metro])
+        return response
 
 
 class YandexParser:
@@ -87,12 +98,6 @@ class YandexParser:
         self.apartments_config = configs[0]
         self.apartment_sections = configs[1]
         self.apartment = configs[2]
-        print(self.apartments_config)
-        print(self.apartment_sections)
-        print(self.apartment)
-        # self.apartments_config = json.load(open('json_page_with_apartments.json', 'r', encoding='utf-8'))
-        # self.apartment_sections = json.load(open('json_apartment_page_sections.json', 'r', encoding='utf-8'))
-        # self.apartment = json.load(open('json_apartment_page.json', 'r', encoding='utf-8'))
         self.driver = self.start_driver()
 
     def start_driver(self) -> webdriver.Chrome:
@@ -130,7 +135,7 @@ class YandexParser:
                     apartment_info = self.get_info_from_apartment_page(apartment_link)
                     self.add_info_in_db(apartment_info)
                     apartments.append(apartment_info)
-                break
+                self.go_to_next_page()
         finally:
             self.close_driver()
             ParserController().change_parser_status(from_parser_stop=True)
@@ -192,8 +197,10 @@ class YandexParser:
             else:
                 new_apartment_info = self.get_stations_info_from_apartment_page(sections_bs_markup, section_name,
                                                                                 markup, param_name)
+            print('NEW', new_apartment_info)
             all_apartment_info.update(new_apartment_info)
 
+        print('ALL', all_apartment_info)
         return all_apartment_info
 
     @staticmethod
@@ -214,7 +221,7 @@ class YandexParser:
         tags = self.get_tags_with_text_inside(sections_bs_markup, markup, section_name)
 
         if tags is False:
-            return {param_name: None}
+            return {param_name: "Нет информации"}
 
         time_to_nearest_station = []
 
@@ -233,12 +240,8 @@ class YandexParser:
         def is_sub_in_clear_text(sub: str, clear_text: str) -> (True, False):
             """Compare substring that we are trying to find with text that we got from tag"""
             if sub.lower() in clear_text or sub.lower() == clear_text.lower():
-                print(f'Подстрока - {sub}')
-                print(f'Текст - {clear_text}')
                 return True
             elif sub.capitalize() in clear_text or sub.capitalize() == clear_text.capitalize():
-                print(f'Подстрока - {sub}')
-                print(f'Текст - {clear_text}')
                 return True
             else:
                 return False
@@ -246,7 +249,7 @@ class YandexParser:
         tags = self.get_tags_with_text_inside(sections_bs_markup, markup, section_name)
 
         if not tags:
-            return {param_name: None}
+            return {param_name: "Нет информации"}
 
         for tag in tags:
             try:
@@ -258,21 +261,25 @@ class YandexParser:
             for sub in subs_for_search:
                 if is_sub_in_clear_text(sub, clear_text):
                     needed_text = self.edit_text_by_section(section_name, clear_text, subs_for_search, sub)
+                    if param_name == 'rooms_info' and '/' in needed_text:
+                        needed_text = len(needed_text.split('/'))
+                    print({param_name: needed_text})
                     return {param_name: needed_text}
 
         else:
-            return {param_name: None}
+            return {param_name: "Нет информации"}
 
-    def go_to_next_page(self, page: str, page_num: str) -> str:
+    def go_to_next_page(self) -> None:
         """Paginate to the next page"""
-        now_page_num = page.split('&')[-1].split('=')[-1]
+        now_page_num = self.page.split('&')[-1].split('=')[-1]
 
-        if now_page_num:
+        try:
             next_num = int(now_page_num) + 1
-        else:
+        except ValueError:
             next_num = 1
 
-        return self.page + f'&page={next_num}'
+        self.page = self.page + f'&page={next_num}'
+        self.driver.get(self.page)
 
     def edit_text_by_section(self, section_name: str, clear_text: str, subs_for_search: str, sub: str) -> str:
         """Get normal text from clear_text"""
@@ -311,12 +318,16 @@ class YandexParser:
     @staticmethod
     def edit_text_for_detail_info(clear_text: str, sub=None):
         """Get text for detail info"""
-        return sub
+        return clear_text.replace('—', '')
 
     @staticmethod
     def edit_text_for_building_info(clear_text: str, sub=None):
         """Get text for building info"""
-        return clear_text
+        remove_sub_start_idx = clear_text.find('(по данным Яндекса)')
+        if remove_sub_start_idx != -1:
+            return clear_text.replace(clear_text[remove_sub_start_idx:], '').strip()
+        else:
+            return clear_text.strip()
 
     @staticmethod
     def edit_text_for_stations_info(clear_text: str, subs_for_search=None):
@@ -329,8 +340,8 @@ class YandexParser:
         if not ApartmentInfo.objects.filter(apartment_link=apartments_info.get('apartment_link')):
             new_info = ApartmentInfo(rooms_info=apartments_info.get('rooms_info'),
                                      total_area=apartments_info.get('total_area'),
-                                     living_space=apartments_info.get('total_area'),
-                                     kitchen_space=apartments_info.get('total_area'),
+                                     living_space=apartments_info.get('living_space'),
+                                     kitchen_space=apartments_info.get('kitchen_space'),
                                      floor=apartments_info.get('floor'),
                                      is_balcony=apartments_info.get('is_balcony'),
                                      house_type=apartments_info.get('house_type'),

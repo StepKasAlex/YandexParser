@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'mainapp/base.html' %}
+{% load static %}
 
-</body>
-</html>
+
+{% block info %}
+    <p><a href="{% url 'mainapp:download_report' %}">СКАЧАТЬ БЛЯТЬ</a></p>
+{% endblock %}
