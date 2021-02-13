@@ -1,10 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'mainapp/base.html' %}
+{% load static %}
 
-</body>
-</html>
+{% block info %}
+    <table>
+        <tr>
+            <th>Количество комнат</th>
+            <th>Общая плозаль</th>
+            <th>Жилая площадь</th>
+            <th>Площадь кухни</th>
+            <th>Этаж</th>
+            <th>Наличие балкона</th>
+            <th>Тип дома</th>
+            <th>Отделка</th>
+            <th>Парковка</th>
+            <th>Видеонаблюдение</th>
+            <th>Консьерж</th>
+            <th>Территория</th>
+            <th>Расстояние до ближайшей станции</th>
+            <th>Ссылка на объявление</th>
+        </tr> <!--ряд с ячейками заголовков-->
+        {% for object in object_list %}
+            <tr>
+                <td>{{ object.rooms_info }}</td>
+                <td>{{ object.total_area }}</td>
+                <td>{{ object.living_space }}</td>
+                <td>{{ object.kitchen_space }}</td>
+                <td>{{ object.floor }}</td>
+                <td>{{ object.is_balcony }}</td>
+                <td>{{ object.house_type }}</td>
+                <td>{{ object.finishing }}</td>
+                <td>{{ object.is_parking }}</td>
+                <td>{{ object.is_cctv }}</td>
+                <td>{{ object.is_concierge }}</td>
+                <td>{{ object.fenced_area }}</td>
+                <td>{{ object.distance_nearest_metro }}</td>
+                <td>{{ object.apartment_link }}</td>
+            </tr>
+         {% endfor %}
+    </table>
+{% endblock %}

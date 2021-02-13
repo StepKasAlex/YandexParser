@@ -9,9 +9,30 @@
             </h1>
         </div>
         <div class="data">
-            <p class="empty">
-                Тут ничего нет, но вы можете найти что-то полезное в других разделах
+            <p class="parser">
+                В данном разделе вы можете запустить парсер и остановить его <br>
+                Если парсер уже запущен, то повторно его запустить нельзя
             </p>
+            <p class="parser">
+                {% if is_start is False %}
+                    Парсер не запущен
+                {% elif is_start is True %}
+                    Парсер работает
+                 {% elif is_start == 'try to stop' %}
+                    Парсер останавливается
+                {% endif %}
+            </p>
+        </div>
+        <div class="parser-start-stop">
+            {% if is_start is False %}
+            <p class="parser-status-change">
+                <a href="{% url 'mainapp:parser_start' %}">Начать сбор</a>
+            </p>
+            {% elif is_start is True %}
+            <p class="parser-status-change parser-status-change-stop">
+                <a href="{% url 'mainapp:stop_parser' %}">Остановить сбор</a>
+            </p>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

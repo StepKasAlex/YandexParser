@@ -57,7 +57,7 @@ html, body {
 
 .menu-button a {
     text-decoration: none;
-    color: rgb(180, 173, 164);;
+    color: rgb(180, 173, 164);
 }
 
 .main-page__header {
@@ -72,8 +72,38 @@ html, body {
     height: 100%;
 }
 
-p.empty {
+p.parser {
     margin-left: 50px;
     color: rgb(174, 167, 157);
     font-size: 16px;
+}
+
+.parser-start-stop {
+    margin-left: 50px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.parser-start-stop a{
+    text-decoration: none;
+    color: rgb(180, 173, 164);
+}
+
+.parser-status-change {
+    border: black 1px solid;
+}
+
+table {
+    border: 1px solid grey;
+    margin-left: 30px;
+    margin-top: 30px;
+}
+/* границы ячеек первого ряда таблицы */
+th {
+    border: 1px solid grey;
+}
+/* границы ячеек тела таблицы */
+td {
+    border: 1px solid grey;
 }
