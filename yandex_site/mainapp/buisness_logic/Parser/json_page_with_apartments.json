@@ -1,4 +1,4 @@
 {
-  "apartment_ad": {"div": {"class": "OffersSerpItem__generalInfo"}},
-  "next_page_button": {"a":  {"class": "Pager__radio-link"}}
+  "apartment_ad": {"tag": "div", "tag_attrs": {"class": "OffersSerpItem__generalInfo"}},
+  "next_page_button": {"tag": "a", "tag_attrs":  {"class": "Pager__radio-link"}}
 }

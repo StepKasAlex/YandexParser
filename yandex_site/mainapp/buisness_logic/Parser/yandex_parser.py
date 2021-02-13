@@ -1,11 +1,13 @@
 import os
 import psycopg2
 import threading
+import json
+import time
 
 from selenium import webdriver
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
-from mainapp.models import ApartmentInfo, Task
+# from mainapp.models import ApartmentInfo, Task
 
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -51,32 +53,56 @@ class YandexParser:
     def __init__(self, configs):
         self.page = 'https://realty.yandex.ru/moskva/kupit/kvartira/studiya,1,2,3,4-i-bolee-komnatnie/?newFlat=YES&' \
                     'deliveryDate=FINISHED&buildingClass=BUSINESS'
-        self.apartments_config = configs[0]
-        self.apartment_sections = configs[1]
-        self.apartment = configs[2]
+        # self.apartments_config = configs[0]
+        # self.apartment_sections = configs[1]
+        # self.apartment = configs[2]
+        self.apartments_config = json.load(open('json_page_with_apartments.json', 'r', encoding='utf-8'))
+        self.apartment_sections = json.load(open('json_apartment_page_sections.json', 'r', encoding='utf-8'))
+        self.apartment = json.load(open('json_apartment_page.json', 'r', encoding='utf-8'))
         self.driver = self.start_driver()
 
-    @staticmethod
-    def start_driver() -> webdriver.Chrome:
+    def start_driver(self) -> webdriver.Chrome:
         """Start selenium webdriver"""
-        return webdriver.Chrome(executable_path=os.getenv('DRIVER_PATH'))
+        options = self.set_driver_options()
+        return webdriver.Chrome(executable_path=os.getenv('DRIVER_PATH'), options=options)
 
     def set_driver_options(self):
         """Set options for selenium webdriver"""
-        pass
+        return None
+
+    def start_parsing(self):
+        """Start parsing yandex site"""
+        try:
+            current_page_html_markup = self.get_html_markup_from_page(self.page)
+            apartments = []
+            while True:
+                apartments_links = self.get_all_apartments_links_from_page(current_page_html_markup)
+                for apartment_link in apartments_links:
+                    apartment_info = self.get_info_from_apartment_page(apartment_link)
+                    apartments.append(apartment_info)
+                print(apartments)
+                break
+        finally:
+            self.close_driver()
 
     def load_page(self, page) -> None:
         """load page"""
         self.driver.get(page)
 
-    def get_html_markup_from_page(self) -> BeautifulSoup:
+    def close_driver(self) -> None:
+        """Close driver"""
+        self.driver.close()
+
+    def get_html_markup_from_page(self, page: str) -> BeautifulSoup:
         """Get html markup from the page"""
+        self.load_page(page)
+        time.sleep(7)
         return BeautifulSoup(self.driver.page_source, 'html.parser')
 
-    def get_all_apartments_links_from_page(self) -> list:
+    def get_all_apartments_links_from_page(self, current_page_html_markup) -> list:
         """Get all apartments links from current page"""
-        current_page_html_markup = self.get_html_markup_from_page()
-        apartments = current_page_html_markup.find_all('div', {'class': 'OffersSerpItem__generalInfo'})
+        apartments_markup = self.apartments_config.get('apartment_ad')
+        apartments = current_page_html_markup.find_all(apartments_markup.get('tag'), apartments_markup.get('tag_attrs'))
         apartments_links = []
 
         for apartment in apartments:
@@ -109,23 +135,92 @@ class YandexParser:
 
         for param, markup in self.apartment.items():
             param_name, section_name = param.split('__')
-            tags = sections_bs_markup.get(section_name).find_all(markup.get('tag'), markup.get('tag_attrs'))
-            for tag in tags:
-                try:
-                    clear_text = tag.get_text(strip=True)
-                except (AttributeError, Exception):
-                    continue
-                subs_for_search = markup.get('subs')
-                if clear_text == subs_for_search or clear_text in subs_for_search:
-                    all_apartment_info.update({
-                        param_name: clear_text
-                    })
+            if section_name == 'none':
+                continue
+            if section_name != 'stations_info':
+                new_apartment_info = self.get_another_info_from_apartment_page(sections_bs_markup, section_name,
+                                                                               markup, param_name)
+                print(new_apartment_info)
             else:
-                all_apartment_info.update({
-                    param_name: 'NULL'
-                })
+                new_apartment_info = self.get_stations_info_from_apartment_page(sections_bs_markup, section_name,
+                                                                                markup, param_name)
+                print(new_apartment_info)
+            all_apartment_info.update(new_apartment_info)
 
         return all_apartment_info
+
+    @staticmethod
+    def get_tags_with_text_inside(sections_bs_markup: dict, markup: dict, section_name: str) -> list:
+        """Get all tags with text that we need"""
+        try:
+            tag = markup.get('tag')
+            tag_attrs = markup.get('tag_attrs')
+            if tag_attrs == 'NULL':
+                tag_attrs = None
+            return sections_bs_markup.get(section_name).find_all(tag, tag_attrs)
+        except AttributeError:
+            print('ВОт тут ошибка')
+            return False
+
+    def get_stations_info_from_apartment_page(self, sections_bs_markup: dict, section_name: str,
+                                              markup: dict, param_name: str) -> dict:
+        """Get info about nearest metro stations to the house"""
+        tags = self.get_tags_with_text_inside(sections_bs_markup, markup, section_name)
+
+        if tags is False:
+            return {param_name: 'NULL'}
+
+        time_to_nearest_station = []
+
+        for tag in tags:
+            try:
+                clear_time = tag.get_text(strip=True).replace(' мин.', '')
+                time_to_nearest_station.append(int(clear_time))
+            except (AttributeError, ValueError, Exception):
+                continue
+
+        return {param_name: min(time_to_nearest_station)} if time_to_nearest_station else {param_name: 'NULL'}
+
+    def get_another_info_from_apartment_page(self, sections_bs_markup: dict, section_name: str,
+                                             markup: dict, param_name: str) -> dict:
+        """Get info about apartment exclude nearest stations to the house"""
+        def is_sub_in_clear_text(sub: str, clear_text: str) -> (True, False):
+            """Compare substring that we are trying to find with text that we got from tag"""
+            if sub.lower() in clear_text or sub.lower() == clear_text.lower():
+                return True
+            elif sub.capitalize() in clear_text or sub.capitalize() == clear_text.capitalize():
+                return True
+            else:
+                return False
+
+        needed_text = None
+        tags = self.get_tags_with_text_inside(sections_bs_markup, markup, section_name)
+
+        if not tags:
+            return {param_name: 'NULL'}
+
+        for tag in tags:
+            try:
+                clear_text = tag.get_text(strip=True)
+            except (AttributeError, Exception):
+                continue
+            subs_for_search = markup.get('subs')
+
+            print(clear_text, subs_for_search)
+
+            if type(subs_for_search) == list:
+                for sub in subs_for_search:
+                    if is_sub_in_clear_text(sub, clear_text):
+                        needed_text = self.edit_text_by_section(section_name, clear_text, subs_for_search)
+                        print('ТО ЧТО НУЖНО', needed_text)
+                        return {param_name: needed_text}
+            elif type(subs_for_search) == str:
+                if is_sub_in_clear_text(subs_for_search, clear_text):
+                    needed_text = self.edit_text_by_section(section_name, clear_text, subs_for_search)
+                    return {param_name: needed_text}
+
+        else:
+            return {param_name: 'NULL'}
 
     def go_to_next_page(self, page: str, page_num: str) -> str:
         """Paginate to the next page"""
@@ -138,6 +233,52 @@ class YandexParser:
 
         return self.page + f'&page={next_num}'
 
+    def edit_text_by_section(self, section_name: str, clear_text: str, subs_for_search: str) -> str:
+        """Get normal text from clear_text"""
+        if section_name == 'tech_info':
+            return self.edit_text_for_tech_info(clear_text, subs_for_search)
+        elif section_name == 'detail_info':
+            return self.edit_text_for_detail_info(clear_text, subs_for_search)
+        elif section_name == 'building_info':
+            return self.edit_text_for_building_info(clear_text, subs_for_search)
+        elif section_name == 'stations_info':
+            return self.edit_text_for_stations_info(clear_text, subs_for_search)
 
-test = ParserController()
-test.stop_task()
+    @staticmethod
+    def edit_text_for_tech_info(clear_text: str, subs_for_search: str):
+        """Get text for tech info"""
+        non_break_space = u'\xa0'
+        if type(subs_for_search) == list:
+            for sub in subs_for_search:
+                if sub in ["этаж из", "этажиз"]:
+                    for num in clear_text.split(' '):
+                        try:
+                            return int(num)
+                        except TypeError:
+                            continue
+                    else:
+                        return 'NULL'
+                clear_text = clear_text.lower().replace(sub, '').replace('м²—', '')
+            return clear_text.strip().replace(non_break_space, '')
+        else:
+            return clear_text.lower().replace(subs_for_search, '').strip().replace(non_break_space, '').replace('м²—', '')
+
+    @staticmethod
+    def edit_text_for_detail_info(clear_text: str, subs_for_search=None):
+        """Get text for detail info"""
+        return clear_text
+
+    @staticmethod
+    def edit_text_for_building_info(clear_text: str, subs_for_search=None):
+        """Get text for building info"""
+        return clear_text
+
+    @staticmethod
+    def edit_text_for_stations_info(clear_text: str, subs_for_search=None):
+        """Get text for building info"""
+        return clear_text
+
+
+if __name__ == '__main__':
+    test = YandexParser(1)
+    test.start_parsing()
