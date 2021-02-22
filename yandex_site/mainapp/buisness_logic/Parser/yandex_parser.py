@@ -125,11 +125,9 @@ class YandexParser:
                     apartment_info = self.get_info_from_apartment_page(apartment_link)
                     self.add_info_in_db(apartment_info)
                     time_to_wait_low = random.randint(4, 10)
-                    print(time_to_wait_low)
                     time.sleep(time_to_wait_low)
                 self.go_to_next_page()
                 time_to_wait = random.randint(25, 35)
-                print(time_to_wait)
                 time.sleep(time_to_wait)
         finally:
             ParserController().change_parser_status(from_parser_stop=True)
@@ -318,9 +316,7 @@ class YandexParser:
     @staticmethod
     def edit_text_for_building_info(clear_text: str, sub=None):
         """Get text for building info"""
-        print(clear_text)
         new_text = clear_text.replace('Дом в', '')
-        print(new_text)
         remove_sub_start_idx = new_text.find('(по данным Яндекса)')
         if remove_sub_start_idx != -1:
             return new_text.replace(new_text[remove_sub_start_idx:], '').strip()
