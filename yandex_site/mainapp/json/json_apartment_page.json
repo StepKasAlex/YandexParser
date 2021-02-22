@@ -13,6 +13,8 @@
     "subs": ["балкон", "лоджия"]},
   "house_type__building_info": {"tag": "li", "tag_attrs": "NULL",
     "subs": ["кирпичный", "монолитный", "панельный", "кирпично-монолитный", "блочный", "кирпично", "монолитное"]},
+  "house_name__building_info" : {"tag": "h2", "tag_attrs": "NULL",
+    "subs":  ["Дом в", "сдан"]},
   "finishing__detail_info": {"tag": "li", "tag_attrs": "NULL",
     "subs": ["отделка", "отделкаа"]},
   "is_parking__building_info": {"tag": "li", "tag_attrs": "NULL",

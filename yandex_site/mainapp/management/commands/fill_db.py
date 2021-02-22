@@ -23,7 +23,7 @@ class Command(BaseCommand):
         apartment_sections = load_json_data('json_apartment_page_sections')
         apartment = load_json_data('json_apartment_page')
 
-        # Task.objects.all().delete()
+        Task.objects.all().delete()
 
         Task(main_page_config={}, apartments_page_config=apartments, apartment_page_sections_config=apartment_sections,
              apartment_page_config=apartment, status=0).save()

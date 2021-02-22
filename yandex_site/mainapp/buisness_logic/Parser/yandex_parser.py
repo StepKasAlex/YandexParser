@@ -1,4 +1,5 @@
 import os
+import random
 import threading
 import csv
 import requests
@@ -113,7 +114,6 @@ class YandexParser:
     def start_parsing(self) -> None:
         """Start parsing yandex site"""
         try:
-            apartments = []
             while True:
                 current_page_html_markup = self.get_html_markup_from_page(self.page)
                 if self.stop_parsing():
@@ -124,10 +124,14 @@ class YandexParser:
                         return None
                     apartment_info = self.get_info_from_apartment_page(apartment_link)
                     self.add_info_in_db(apartment_info)
-                    apartments.append(apartment_info)
+                    time_to_wait_low = random.randint(4, 10)
+                    print(time_to_wait_low)
+                    time.sleep(time_to_wait_low)
                 self.go_to_next_page()
+                time_to_wait = random.randint(25, 35)
+                print(time_to_wait)
+                time.sleep(time_to_wait)
         finally:
-            self.close_driver()
             ParserController().change_parser_status(from_parser_stop=True)
 
     @staticmethod
@@ -189,10 +193,10 @@ class YandexParser:
             else:
                 new_apartment_info = self.get_stations_info_from_apartment_page(sections_bs_markup, section_name,
                                                                                 markup, param_name)
-            print('NEW', new_apartment_info)
+            # print('NEW', new_apartment_info)
             all_apartment_info.update(new_apartment_info)
 
-        print('ALL', all_apartment_info)
+        # print('ALL', all_apartment_info)
         return all_apartment_info
 
     @staticmethod
@@ -255,7 +259,7 @@ class YandexParser:
                     needed_text = self.edit_text_by_section(section_name, clear_text, subs_for_search, sub)
                     if param_name == 'rooms_info' and '/' in needed_text:
                         needed_text = len(needed_text.split('/'))
-                    print({param_name: needed_text})
+                    # print({param_name: needed_text})
                     return {param_name: needed_text}
 
         else:
@@ -314,11 +318,14 @@ class YandexParser:
     @staticmethod
     def edit_text_for_building_info(clear_text: str, sub=None):
         """Get text for building info"""
-        remove_sub_start_idx = clear_text.find('(по данным Яндекса)')
+        print(clear_text)
+        new_text = clear_text.replace('Дом в', '')
+        print(new_text)
+        remove_sub_start_idx = new_text.find('(по данным Яндекса)')
         if remove_sub_start_idx != -1:
-            return clear_text.replace(clear_text[remove_sub_start_idx:], '').strip()
+            return new_text.replace(new_text[remove_sub_start_idx:], '').strip()
         else:
-            return clear_text.strip()
+            return new_text.strip()
 
     @staticmethod
     def edit_text_for_stations_info(clear_text: str, subs_for_search=None):
