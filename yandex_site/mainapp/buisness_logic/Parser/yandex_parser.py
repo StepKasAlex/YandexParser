@@ -81,15 +81,16 @@ class YandexParserInfoGetter:
         response['Content-Disposition'] = 'attachment; filename="information.csv"'
 
         titles = ['Количество комнат', 'Общая площадь', 'Жилая площадь', 'Площадь кухни', 'Этаж', 'Балкон', 'Тип дома',
-                  'Отделка', 'Парковки', 'Видеонаблюдение', 'Консьерж', 'Территория', 'Расстояние до станции',
-                  'Ссылка на объявление']
+                  'Название дома', 'Отделка', 'Парковки', 'Видеонаблюдение', 'Консьерж', 'Территория',
+                  'Расстояние до станции', 'Ссылка на объявление']
         writer = csv.writer(response)
         writer.writerow(titles)
         information = ApartmentInfo.objects.all()
         for info in information:
             writer.writerow([info.rooms_info, info.total_area, info.living_space, info.kitchen_space, info.floor,
-                             info.is_balcony, info.house_type, info.finishing, info.is_parking, info.is_cctv,
-                             info.is_concierge, info.fenced_area, info.distance_nearest_metro])
+                             info.is_balcony, info.house_type, info.house_name, info.finishing, info.is_parking,
+                             info.is_cctv, info.is_concierge, info.fenced_area, info.distance_nearest_metro,
+                             info.apartment_link])
         return response
 
 
