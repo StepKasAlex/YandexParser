@@ -111,6 +111,7 @@ class YandexParser:
         new_proxy = random.choice(self.proxies)
         print("NEW PROXY", new_proxy)
         self.proxy_server['http'] = new_proxy
+        self.proxy_server['https'] = new_proxy
 
     @staticmethod
     def stop_parsing() -> (True, False):
