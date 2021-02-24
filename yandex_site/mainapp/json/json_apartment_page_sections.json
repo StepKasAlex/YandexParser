@@ -2,5 +2,6 @@
   "tech_info": {"tag": "div", "tag_attrs": {"class":  "OfferTechDescription"}},
   "detail_info": {"tag": "div", "tag_attrs": {"class": "OfferDetailsDescription"}},
   "building_info": {"tag": "section", "tag_attrs": {"class": "BuildingInfo"}},
-  "stations_info": {"tag": "div", "tag_attrs": {"class": "OfferHeaderLocation__stations"}}
+  "stations_info": {"tag": "div", "tag_attrs": {"class": "OfferHeaderLocation__stations"}},
+  "base_info": {"tag": "div", "tag_attrs": {"class": "OfferBaseInfo"}}
 }

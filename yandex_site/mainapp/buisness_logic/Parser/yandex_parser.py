@@ -80,17 +80,17 @@ class YandexParserInfoGetter:
         response = HttpResponse(content_type="text/csv")
         response['Content-Disposition'] = 'attachment; filename="information.csv"'
 
-        titles = ['Количество комнат', 'Общая площадь', 'Жилая площадь', 'Площадь кухни', 'Этаж', 'Балкон', 'Тип дома',
+        titles = ['Цена за кв метр', 'Количество комнат', 'Общая площадь', 'Жилая площадь', 'Площадь кухни', 'Этаж', 'Балкон', 'Тип дома',
                   'Название дома', 'Отделка', 'Парковки', 'Видеонаблюдение', 'Консьерж', 'Территория',
                   'Расстояние до станции', 'Ссылка на объявление']
         writer = csv.writer(response)
         writer.writerow(titles)
         information = ApartmentInfo.objects.all()
         for info in information:
-            writer.writerow([info.rooms_info, info.total_area, info.living_space, info.kitchen_space, info.floor,
-                             info.is_balcony, info.house_type, info.house_name, info.finishing, info.is_parking,
-                             info.is_cctv, info.is_concierge, info.fenced_area, info.distance_nearest_metro,
-                             info.apartment_link])
+            writer.writerow([info.price, info.rooms_info, info.total_area, info.living_space, info.kitchen_space,
+                             info.floor, info.is_balcony, info.house_type, info.house_name, info.finishing,
+                             info.is_parking, info.is_cctv, info.is_concierge, info.fenced_area,
+                             info.distance_nearest_metro, info.apartment_link])
         return response
 
 
@@ -102,6 +102,14 @@ class YandexParser:
         self.apartments_config = configs[0]
         self.apartment_sections = configs[1]
         self.apartment = configs[2]
+        self.proxies = ['http://a4fnJNrE:PDmfB1qB@45.134.25.49:47286', 'http://a4fnJNrE:PDmfB1qB@94.158.189.19:45664',
+                        'http://a4fnJNrE:PDmfB1qB@194.32.222.100:59124', 'http://a4fnJNrE:PDmfB1qB@45.81.138.122:45629']
+        self.proxy_server = {}
+
+    def set_proxy_server(self) -> None:
+        """Set proxy_server"""
+        new_proxy = random.choice(self.proxies)
+        self.proxy_server['http'] = new_proxy
 
     @staticmethod
     def stop_parsing() -> (True, False):
@@ -116,11 +124,13 @@ class YandexParser:
         """Start parsing yandex site"""
         try:
             while True:
+                self.set_proxy_server()
                 current_page_html_markup = self.get_html_markup_from_page(self.page)
                 if self.stop_parsing():
                     return None
                 apartments_links = self.get_all_apartments_links_from_page(current_page_html_markup)
                 for apartment_link in apartments_links:
+                    self.set_proxy_server()
                     if self.stop_parsing():
                         return None
                     apartment_info = self.get_info_from_apartment_page(apartment_link)
@@ -133,10 +143,9 @@ class YandexParser:
         finally:
             ParserController().change_parser_status(from_parser_stop=True)
 
-    @staticmethod
-    def load_page(page):
+    def load_page(self, page):
         """load page"""
-        r = requests.get(page)
+        r = requests.get(page, proxies=self.proxy_server)
         return r
 
     def close_driver(self) -> None:
@@ -192,10 +201,8 @@ class YandexParser:
             else:
                 new_apartment_info = self.get_stations_info_from_apartment_page(sections_bs_markup, section_name,
                                                                                 markup, param_name)
-            # print('NEW', new_apartment_info)
             all_apartment_info.update(new_apartment_info)
 
-        # print('ALL', all_apartment_info)
         return all_apartment_info
 
     @staticmethod
@@ -258,7 +265,6 @@ class YandexParser:
                     needed_text = self.edit_text_by_section(section_name, clear_text, subs_for_search, sub)
                     if param_name == 'rooms_info' and '/' in needed_text:
                         needed_text = len(needed_text.split('/'))
-                    # print({param_name: needed_text})
                     return {param_name: needed_text}
 
         else:
@@ -285,6 +291,8 @@ class YandexParser:
             return self.edit_text_for_building_info(clear_text, sub)
         elif section_name == 'stations_info':
             return self.edit_text_for_stations_info(clear_text, subs_for_search)
+        elif section_name == 'base_info':
+            return self.edit_text_for_base_info(clear_text, subs_for_search)
 
     @staticmethod
     def edit_text_for_tech_info(clear_text: str, subs_for_search: str):
@@ -330,10 +338,18 @@ class YandexParser:
         return clear_text
 
     @staticmethod
+    def edit_text_for_base_info(clear_text: str, subs_for_search=None):
+        """Get text for base info"""
+        for sub in subs_for_search:
+            clear_text = clear_text.replace(sub, '')
+        return clear_text.strip().replace(' ', '').replace(u'\xa0', '')
+
+    @staticmethod
     def add_info_in_db(apartments_info: dict) -> None:
         """Add into about apartment in database"""
         if not ApartmentInfo.objects.filter(apartment_link=apartments_info.get('apartment_link')):
-            new_info = ApartmentInfo(rooms_info=apartments_info.get('rooms_info'),
+            new_info = ApartmentInfo(price=apartments_info.get('price'),
+                                     rooms_info=apartments_info.get('rooms_info'),
                                      total_area=apartments_info.get('total_area'),
                                      living_space=apartments_info.get('living_space'),
                                      kitchen_space=apartments_info.get('kitchen_space'),

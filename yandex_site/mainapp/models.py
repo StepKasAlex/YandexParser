@@ -2,6 +2,7 @@ from django.db import models
 
 
 class ApartmentInfo(models.Model):
+    price = models.CharField(max_length=255, verbose_name='цена', blank=True, null=True)
     rooms_info = models.CharField(max_length=255, verbose_name='количество квартир', blank=True, null=True)
     total_area = models.CharField(max_length=255, verbose_name='общая площадь', blank=True, null=True)
     living_space = models.CharField(max_length=255, verbose_name='жилая площадь', blank=True, null=True)

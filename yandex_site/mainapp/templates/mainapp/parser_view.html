@@ -4,6 +4,7 @@
 {% block info %}
     <table>
         <tr>
+            <th>Стоимость кв метра</th>
             <th>Количество комнат</th>
             <th>Общая плозаль</th>
             <th>Жилая площадь</th>
@@ -22,6 +23,7 @@
         </tr> <!--ряд с ячейками заголовков-->
         {% for object in object_list %}
             <tr>
+                <td>{{ object.price }}</td>
                 <td>{{ object.rooms_info }}</td>
                 <td>{{ object.total_area }}</td>
                 <td>{{ object.living_space }}</td>
