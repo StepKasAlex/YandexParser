@@ -109,6 +109,7 @@ class YandexParser:
     def set_proxy_server(self) -> None:
         """Set proxy_server"""
         new_proxy = random.choice(self.proxies)
+        print("NEW PROXY", new_proxy)
         self.proxy_server['http'] = new_proxy
 
     @staticmethod
@@ -124,12 +125,14 @@ class YandexParser:
         """Start parsing yandex site"""
         try:
             while True:
+                print('New round')
                 self.set_proxy_server()
                 current_page_html_markup = self.get_html_markup_from_page(self.page)
                 if self.stop_parsing():
                     return None
                 apartments_links = self.get_all_apartments_links_from_page(current_page_html_markup)
                 for apartment_link in apartments_links:
+                    print(apartment_link)
                     self.set_proxy_server()
                     if self.stop_parsing():
                         return None
@@ -146,6 +149,7 @@ class YandexParser:
     def load_page(self, page):
         """load page"""
         r = requests.get(page, proxies=self.proxy_server)
+        print('Состояние запроса - ', r)
         return r
 
     def close_driver(self) -> None:
